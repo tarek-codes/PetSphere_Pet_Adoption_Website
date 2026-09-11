@@ -66,13 +66,42 @@ const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/petsphere
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Cached MongoDB Connection for Serverless & Long-running
+let cachedConnection = null;
+async function connectToDatabase() {
+    if (cachedConnection && mongoose.connection.readyState === 1) {
+        return cachedConnection;
+    }
+    if (!cachedConnection) {
+        cachedConnection = mongoose.connect(mongoURI, {
+            bufferCommands: false,
+        }).catch(err => {
+            cachedConnection = null;
+            console.error('MongoDB Connection Error:', err);
+            throw err;
+        });
+    }
+    return cachedConnection;
+}
+
+// Ensure DB is connected before processing requests
+app.use(async (req, res, next) => {
+    try {
+        await connectToDatabase();
+        next();
+    } catch (err) {
+        console.error('Database middleware error:', err);
+        res.status(500).json({ message: 'Database connection failed. Please check MongoDB configuration.' });
+    }
+});
+
 // Session configuration with MongoStore
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secretKey',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-        mongoUrl: mongoURI,
+        clientPromise: connectToDatabase().then(m => m.connection.getClient()),
         collectionName: 'sessions',
         ttl: 60 * 60 * 24 // 1 day
     }),
@@ -83,11 +112,6 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24 // 24 hours
     }
 }));
-
-// MongoDB Connection
-mongoose.connect(mongoURI)
-.then(() => console.log('MongoDB Connected'))
-.catch(err => console.log(err));
 
 // Routes
 app.use('/', require('./routes/authRoutes'));

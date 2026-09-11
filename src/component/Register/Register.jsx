@@ -24,12 +24,24 @@ const Register = () => {
         fetch(apiUrl('/signup'), {
             method: 'POST',
             headers: {
-                'content-type': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(info)
         })
-            .then(res => res.json())
-            .then(data => {
+            .then(async (res) => {
+                const contentType = res.headers.get("content-type");
+                let data = {};
+                if (contentType && contentType.includes("application/json")) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    throw new Error(text || `Server error (${res.status})`);
+                }
+
+                if (!res.ok) {
+                    throw new Error(data.message || `Registration failed with status ${res.status}`);
+                }
+
                 if (data.insertedId) {
                     Swal.fire({
                         title: 'Success!',
@@ -60,8 +72,8 @@ const Register = () => {
                 }
             })
             .catch(err => {
-                console.error('Fetch error:', err);
-                setErrorMsg('Something went wrong during registration.');
+                console.error('Registration error:', err);
+                setErrorMsg(err.message || 'Something went wrong during registration.');
             });
     };
 
