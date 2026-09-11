@@ -5,16 +5,9 @@ const AdoptionRequest = require('../models/AdoptionRequest');
 const multer = require('multer');
 const path = require('path');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/pets/'); // Make sure this directory exists
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'pet-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// Use memoryStorage for serverless compatibility (Vercel has a read-only filesystem)
+// For local dev, files are in memory; for production use image URLs (Cloudinary, ImgBB, etc.)
+const storage = multer.memoryStorage();
 
 const upload = multer({ 
     storage: storage,

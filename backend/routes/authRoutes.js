@@ -3,9 +3,9 @@ const router = express.Router();
 const authController = require('../controllers/authRoutesController');
 
 
-// Signup Page
+// Signup Page - returns JSON (frontend is React SPA)
 router.get('/signup', (req, res) => {
-    res.render('signup');
+    res.json({ message: 'Use POST /signup to register' });
 });
 // 
 // Signup Logic
@@ -16,9 +16,9 @@ router.post('/signup', authController.signup);
 
   
 
-// Login Page
+// Login Page - returns JSON (frontend is React SPA)
 router.get('/login', (req, res) => {
-    res.render('login');
+    res.json({ message: 'Use POST /login to authenticate' });
 });
 
 // Login Logic

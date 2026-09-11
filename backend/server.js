@@ -4,7 +4,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const bodyParser = require('body-parser');
 const path = require('path');
 
 const isVercel = process.env.VERCEL === '1';
@@ -62,12 +61,11 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: true }));
+// Static files and EJS views are only needed for local server, not serverless
+if (!isVercel) {
+    app.use(express.static(path.join(__dirname, 'public')));
+}
 
 const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/petsphere';
 
