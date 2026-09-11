@@ -29,11 +29,13 @@ const Login = () => {
             });
 
             const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("Server did not return JSON. Please contact administrator.");
+            let data = {};
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                throw new Error(text || `Server error (${response.status})`);
             }
-
-            const data = await response.json();
 
             if (response.ok) {
                 setUser(data.user);

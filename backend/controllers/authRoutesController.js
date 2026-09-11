@@ -36,11 +36,19 @@ exports.signup = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
-    console.log('Login attempt with data:', req.body);
-    
-    const user = await User.findOne({ email, password });
-    if (user) {
+    try {
+        const { email, password } = req.body;
+        console.log('Login attempt for email:', email);
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+        
+        const user = await User.findOne({ email, password });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
         // Check if user is banned
         if (user.banned) {
             return res.status(403).json({ message: 'Your account has been banned. Please contact support.' });
@@ -51,18 +59,22 @@ exports.login = async (req, res) => {
         req.session.role = user.role;
         
         // Return success response with user info
-        res.status(200).json({
+        return res.status(200).json({
             message: 'Login successful',
             user: {
                 id: user._id,
+                name: user.name,
                 role: user.role,
                 email: user.email
             }
         });
-    } else {
-        return res.status(401).json({ message: 'Invalid credentials' });
+    } catch (error) {
+        console.error('Login controller error:', error);
+        return res.status(500).json({
+            message: error.message || 'An unexpected server error occurred during login'
+        });
     }
-}
+};
 
 
 exports.checkSession = async (req, res) => {
