@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPetImageUrl, handleImageError } from '../../utils/imageUtils';
 import { IoCloseOutline, IoCalendarOutline, IoPersonOutline, IoLocationOutline, IoChatbubbleOutline, IoCheckmarkCircleOutline } from 'react-icons/io5';
+import { apiUrl } from '../../utils/api';
 
 // Redesigned light premium slate modal & container styles
 const modalStyles = {
@@ -134,7 +135,7 @@ const LostOrFound = () => {
 
     const fetchLostPets = async () => {
         try {
-            const response = await fetch('http://localhost:3000/lost-pets', {
+            const response = await fetch(apiUrl('/lost-pets'), {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -151,7 +152,7 @@ const LostOrFound = () => {
 
     const handleMarkAsFound = async (reportId) => {
         try {
-            const response = await fetch(`http://localhost:3000/mark-found/${reportId}`, {
+            const response = await fetch(apiUrl(`/mark-found/${reportId}`), {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -171,7 +172,7 @@ const LostOrFound = () => {
 
     const fetchComments = async (reportId) => {
         try {
-            const response = await fetch(`http://localhost:3000/reports/${reportId}/comments`, {
+            const response = await fetch(apiUrl(`/reports/${reportId}/comments`), {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -185,7 +186,7 @@ const LostOrFound = () => {
 
     const handleAddComment = async (reportId, text) => {
         try {
-            const response = await fetch(`http://localhost:3000/reports/${reportId}/comments`, {
+            const response = await fetch(apiUrl(`/reports/${reportId}/comments`), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

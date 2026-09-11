@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../provider/Authprovider';
 import { useTheme } from '../../context/ThemeContext';
 import { getPetImageUrl, handleImageError } from '../../utils/imageUtils';
+import { apiUrl } from '../../utils/api';
 
 import {
     FaPaw, FaComments, FaCalendarAlt, FaSearch, FaBell, FaCheck, FaTimes,
@@ -122,7 +123,7 @@ const UserHome = () => {
     // Fetch adoption requests
     const fetchAdoptionRequests = async () => {
         try {
-            const response = await fetch('http://localhost:3000/owner-adoption-requests', {
+            const response = await fetch(apiUrl('/owner-adoption-requests'), {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -141,7 +142,7 @@ const UserHome = () => {
     // Fetch adoption limit status
     const fetchAdoptionLimitStatus = async () => {
         try {
-            const response = await fetch('http://localhost:3000/adoption-limit-status', {
+            const response = await fetch(apiUrl('/adoption-limit-status'), {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -160,7 +161,7 @@ const UserHome = () => {
     // Fetch active chats count
     const fetchChatsCount = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/chats', {
+            const response = await fetch(apiUrl('/api/chats'), {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -175,7 +176,7 @@ const UserHome = () => {
     // Handle adoption request approval/rejection
     const handleAdoptionRequest = async (requestId, status) => {
         try {
-            const response = await fetch(`http://localhost:3000/review-adoption/${requestId}`, {
+            const response = await fetch(apiUrl(`/review-adoption/${requestId}`), {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -209,7 +210,7 @@ const UserHome = () => {
                 setLoading(true);
                 setError(null);
 
-                const response = await fetch('http://localhost:3000/pets', {
+                const response = await fetch(apiUrl('/pets'), {
                     method: 'GET',
                     credentials: 'include',
                     headers: {

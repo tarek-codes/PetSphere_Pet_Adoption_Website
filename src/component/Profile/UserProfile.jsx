@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../provider/Authprovider';
 import { useNavigate } from 'react-router-dom';
 import { getPetImageUrl, handleImageError } from '../../utils/imageUtils';
+import { apiUrl } from '../../utils/api';
 import { 
     IoMailOutline, 
     IoCallOutline, 
@@ -16,11 +17,10 @@ import {
 
 const UserProfile = () => {
     const { userInfo } = useContext(AuthContext);
-    const navigate = useNavigate();
-
     const [profile, setProfile] = useState(null);
     const [pets, setPets] = useState([]);
     const [loadingPets, setLoadingPets] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!userInfo?._id) {
@@ -29,7 +29,7 @@ const UserProfile = () => {
         }
 
         // Fetch profile
-        fetch(`http://localhost:3000/profile/${userInfo._id}`)
+        fetch(apiUrl(`/profile/${userInfo._id}`))
             .then((response) => response.json())
             .then((data) => {
                 setProfile(data);
@@ -40,7 +40,7 @@ const UserProfile = () => {
             });
 
         // Fetch user's pets
-        fetch('http://localhost:3000/pets', {
+        fetch(apiUrl('/pets'), {
             credentials: 'include',
         })
             .then(res => res.json())

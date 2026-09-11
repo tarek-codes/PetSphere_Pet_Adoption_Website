@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import io from 'socket.io-client';
 import { getPetImageUrl, handleImageError } from '../../utils/imageUtils';
 import { IoMale, IoFemale, IoChevronBackOutline, IoChatbubbleEllipsesOutline } from 'react-icons/io5';
+import { apiUrl, API_BASE_URL } from '../../utils/api';
 
 const Chat = () => {
     const { chatId, petId } = useParams();
@@ -37,7 +38,7 @@ const Chat = () => {
                 setError(null);
                 
                 // 1. Get current user info
-                const userResponse = await fetch('http://localhost:3000/user-info', {
+                const userResponse = await fetch(apiUrl('/user-info'), {
                     credentials: 'include'
                 });
                 
@@ -53,7 +54,7 @@ const Chat = () => {
 
                 // 2. Handle new chat creation & redirect if petId is provided
                 if (petId) {
-                    const chatResponse = await fetch(`http://localhost:3000/api/chat/pet/${petId}`, {
+                    const chatResponse = await fetch(apiUrl(`/api/chat/pet/${petId}`), {
                         credentials: 'include'
                     });
                     
@@ -70,7 +71,7 @@ const Chat = () => {
 
                 // 3. Load existing chat by chatId
                 if (chatId) {
-                    const chatResponse = await fetch(`http://localhost:3000/api/chat/${chatId}`, {
+                    const chatResponse = await fetch(apiUrl(`/api/chat/${chatId}`), {
                         credentials: 'include'
                     });
                     
@@ -96,7 +97,7 @@ const Chat = () => {
                             setPetInfo(chatData.chat.petId);
                         } else {
                             try {
-                                const petResponse = await fetch(`http://localhost:3000/pets/${chatData.chat.petId}`, {
+                                const petResponse = await fetch(apiUrl(`/pets/${chatData.chat.petId}`), {
                                     credentials: 'include'
                                 });
                                 if (petResponse.ok) {
@@ -110,7 +111,7 @@ const Chat = () => {
                     }
 
                     // 4. Initialize socket connection
-                    const newSocket = io('http://localhost:3000', {
+                    const newSocket = io(API_BASE_URL, {
                         withCredentials: true,
                         timeout: 10000,
                         transports: ['websocket', 'polling']

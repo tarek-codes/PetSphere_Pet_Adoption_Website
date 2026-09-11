@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node backend/server.js",
+    "seed": "node backend/seed.js"
   },
   "dependencies": {
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -23,7 +25,21 @@
     "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.1",
     "sort-by": "^1.2.0",
-    "sweetalert2": "^11.17.2"
+    "sweetalert2": "^11.17.2",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "connect-mongo": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "multer": "^1.4.5-lts.2",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

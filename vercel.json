@@ -1,0 +1,165 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/check-session",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/login",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/signup",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/logout",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/user-info",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/users(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/user/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/pets(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/user-pets",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/add-pet",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/update-pet/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/delete-pet/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/available-adoptions",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/pending-adoptions",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/owner-adoption-requests",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/adoption-limit-status",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/request-adoption/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/request-pet-adoption/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/review-adoption/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/lost-pets",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/report-lost/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/mark-found/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/reports/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/profile/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/update-profile/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/add-vaccination/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/edit-vaccination/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/delete-vaccination/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/add-vet-appointment/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/edit-vet-appointment/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/delete-vet-appointment/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/add-health-log/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/health-logs/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/health-log/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/update-walking-data/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/reset-walking-data/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/upload-pet-image",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

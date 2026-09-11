@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../provider/Authprovider';
 import axios from 'axios';
+import { apiUrl } from '../../utils/api';
 
 const Reviews = () => {
     const [reviews, setReviews] = useState([]);
@@ -25,7 +26,7 @@ const Reviews = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get('http://localhost:3000/api/reviews', { 
+            const response = await axios.get(apiUrl('/api/reviews'), { 
                 withCredentials: true 
             });
             setReviews(response.data);
@@ -49,7 +50,7 @@ const Reviews = () => {
             setError(null);
             if (editingReview) {
                 const response = await axios.put(
-                    `http://localhost:3000/api/reviews/${editingReview._id}`,
+                    apiUrl(`/api/reviews/${editingReview._id}`),
                     newReview,
                     { 
                         withCredentials: true,
@@ -64,7 +65,7 @@ const Reviews = () => {
                 setEditingReview(null);
             } else {
                 const response = await axios.post(
-                    'http://localhost:3000/api/reviews',
+                    apiUrl('/api/reviews'),
                     newReview,
                     { 
                         withCredentials: true,
@@ -96,7 +97,7 @@ const Reviews = () => {
         
         try {
             setLoading(true);
-            await axios.delete(`http://localhost:3000/api/reviews/${reviewId}`, {
+            await axios.delete(apiUrl(`/api/reviews/${reviewId}`), {
                 withCredentials: true
             });
             setReviews(prevReviews => prevReviews.filter(review => review._id !== reviewId));

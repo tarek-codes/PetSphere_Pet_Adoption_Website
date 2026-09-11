@@ -1,5 +1,5 @@
-import { Children, StrictMode } from 'react'
-import { createRoot, ReactDOM } from 'react-dom/client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import {
@@ -28,7 +28,7 @@ import EditPetProfile from './component/Edit Pet Profile/editPetProfile.jsx';
 import Notification from './component/Notification/Notification.jsx';
 import Adoption from './component/Adoption/Adoption.jsx';
 import LostOrfound from './component/LostOrFound/LostOrfound.jsx';
-import Reviews from './component/Reviews/Reviews'; 
+import Reviews from './component/Reviews/Reviews.jsx'; 
 // naimur
 import Users from './component/Users/Users.jsx';
 import Chat from './component/Chat/Chat.jsx';

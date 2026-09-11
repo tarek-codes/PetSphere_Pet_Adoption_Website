@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import PetCard from './PetCard';
+import { apiUrl } from '../../utils/api';
 
 const Pets = () => {
     const [pets, setPets] = useState([]);
     const [sortOption, setSortOption] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:3000/pets', {
+        fetch(apiUrl('/pets'), {
             credentials: 'include',
         })
             .then(res => res.json())

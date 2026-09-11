@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../provider/Authprovider';
 import { useNavigate } from 'react-router-dom';
+import { apiUrl } from '../../utils/api';
 
 const Users = () => {
     // State management for users list, loading state, error handling, and search
@@ -42,7 +43,7 @@ const Users = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/users', {
+            const response = await fetch(apiUrl('/users'), {
                 credentials: 'include'
             });
 
@@ -67,7 +68,7 @@ const Users = () => {
     // Handle ban/unban user action
     const handleBanUser = async (userId, isBanned) => {
         try {
-            const response = await fetch(`http://localhost:3000/users/${userId}/ban`, {
+            const response = await fetch(apiUrl(`/users/${userId}/ban`), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

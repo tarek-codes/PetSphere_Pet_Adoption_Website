@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getPetImageUrl, handleImageError } from '../../utils/imageUtils';
 import { IoMale, IoFemale, IoSearchOutline, IoChatbubbleEllipsesOutline, IoHomeOutline, IoMailOutline, IoPersonOutline, IoCallOutline } from 'react-icons/io5';
 import { AuthContext } from '../../provider/Authprovider';
+import { apiUrl } from '../../utils/api';
 
 const Adoption = () => {
     const [pets, setPets] = useState([]);
@@ -32,7 +33,7 @@ const Adoption = () => {
                 ageFilter: ageSort
             });
             
-            const response = await fetch(`http://localhost:3000/available-adoptions?${queryParams}`, {
+            const response = await fetch(apiUrl(`/available-adoptions?${queryParams}`), {
                 credentials: 'include'
             });
             const data = await response.json();
@@ -178,7 +179,7 @@ const Adoption = () => {
                                                 className="w-full py-2 px-3 text-center text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition duration-200 flex items-center justify-center gap-1"
                                                 onClick={async () => {
                                                     try {
-                                                        const res = await fetch(`http://localhost:3000/request-pet-adoption/${pet._id}`, {
+                                                        const res = await fetch(apiUrl(`/request-pet-adoption/${pet._id}`), {
                                                             method: 'POST',
                                                             credentials: 'include',
                                                         });
@@ -206,7 +207,7 @@ const Adoption = () => {
                                                     className="w-full py-2 px-3 text-center text-primary-600 bg-white border border-primary-200 rounded-xl hover:bg-primary-50 transition duration-200 flex items-center justify-center gap-1"
                                                     onClick={async () => {
                                                         try {
-                                                            const chatResponse = await fetch(`http://localhost:3000/api/chat/check/${pet._id}`, {
+                                                            const chatResponse = await fetch(apiUrl(`/api/chat/check/${pet._id}`), {
                                                                 credentials: 'include'
                                                             });
                                                             

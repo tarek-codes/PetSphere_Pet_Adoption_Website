@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
+import { API_BASE_URL } from '../utils/api';
 
 const SocketContext = createContext();
 
@@ -16,25 +17,38 @@ export const SocketProvider = ({ children }) => {
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        const newSocket = io('http://localhost:3000', {
-            withCredentials: true,
-            autoConnect: false
-        });
+        let newSocket;
+        try {
+            newSocket = io(API_BASE_URL, {
+                withCredentials: true,
+                autoConnect: false,
+                transports: ['polling', 'websocket'],
+                timeout: 5000
+            });
 
-        newSocket.on('connect', () => {
-            console.log('Socket connected');
-            setIsConnected(true);
-        });
+            newSocket.on('connect', () => {
+                console.log('Socket connected');
+                setIsConnected(true);
+            });
 
-        newSocket.on('disconnect', () => {
-            console.log('Socket disconnected');
-            setIsConnected(false);
-        });
+            newSocket.on('disconnect', () => {
+                console.log('Socket disconnected');
+                setIsConnected(false);
+            });
 
-        setSocket(newSocket);
+            newSocket.on('connect_error', (err) => {
+                // Silently handle socket failure in environments where sockets are unavailable
+                console.warn('Socket connection unavailable:', err?.message || err);
+                setIsConnected(false);
+            });
+
+            setSocket(newSocket);
+        } catch (e) {
+            console.warn('Socket initialization skipped:', e);
+        }
 
         return () => {
-            newSocket.close();
+            if (newSocket) newSocket.close();
         };
     }, []);
 

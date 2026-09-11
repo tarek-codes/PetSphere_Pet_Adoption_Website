@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import LocationPicker from './LocationPicker';
 import bg from '../../assets/bg.jpg';
 import "../UserCSS/EditUserProfile.css";
+import { apiUrl } from '../../utils/api';
 
 const EditUserProfile = () => {
     const { userInfo } = useContext(AuthContext);
@@ -26,11 +27,11 @@ const EditUserProfile = () => {
 
     useEffect(() => {
         if (!userInfo?._id) {
-            console.error('User ID is missing.');
+            setLoading(false);
             return;
         }
 
-        fetch(`http://localhost:3000/profile/${userInfo._id}`)
+        fetch(apiUrl(`/profile/${userInfo._id}`))
             .then((response) => response.json())
             .then((data) => {
                 setProfile({
@@ -75,7 +76,7 @@ const EditUserProfile = () => {
 
     const handleSaveProfile = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/update-profile/${userInfo._id}`, {
+            const response = await fetch(apiUrl(`/update-profile/${userInfo._id}`), {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

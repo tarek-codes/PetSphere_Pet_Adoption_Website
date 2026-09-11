@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
+import { apiUrl } from '../utils/api';
 
 export const AuthContext = createContext();
 
@@ -11,7 +12,7 @@ const Authprovider = ({ children }) => {
     useEffect(() => {
         const checkSession = async () => {
             try {
-                const res = await fetch('http://localhost:3000/check-session', {
+                const res = await fetch(apiUrl('/check-session'), {
                     credentials: 'include'
                 });
                 const data = await res.json();
@@ -35,7 +36,7 @@ const Authprovider = ({ children }) => {
     // Logout function — calls backend to destroy session
     const logout = async () => {
         try {
-            await fetch('http://localhost:3000/logout', {
+            await fetch(apiUrl('/logout'), {
                 method: 'GET',
                 credentials: 'include'
             });

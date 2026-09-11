@@ -4,6 +4,7 @@ import { AuthContext } from '../../provider/Authprovider';
 import { useTheme } from '../../context/ThemeContext';
 import { IoIosNotifications } from "react-icons/io";
 import { FaDog } from "react-icons/fa";
+import { apiUrl } from '../../utils/api';
 
 const Nav = () => {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Nav = () => {
         const fetchUserInfo = async () => {
             if (user?.id) {
                 try {
-                    const res = await fetch(`http://localhost:3000/user/${user.id}`, {
+                    const res = await fetch(apiUrl(`/user/${user.id}`), {
                         credentials: 'include'
                     });
                     const data = await res.json();

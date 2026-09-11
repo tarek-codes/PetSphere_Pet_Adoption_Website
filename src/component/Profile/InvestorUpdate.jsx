@@ -1,32 +1,39 @@
-
-
-
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../../provider/Authprovider';
 import { useNavigate } from 'react-router-dom'; // Import for navigation
+import { apiUrl } from '../../utils/api';
 
 const InvestorUpdate = () => {
     const { userInfo } = useContext(AuthContext);
     const navigate = useNavigate();
-// console.log('a',userInfo._id);
-// console.log('b',userInfo.id);
-
-    // Set initial profile data state from the userInfo
     const [profileData, setProfileData] = useState({
-        name: userInfo?.name || '',
-        // email: userInfo?.email || '',
-        contactInfo: userInfo?.contactInfo || '',
-        image: userInfo?.image || '',
-        documents: userInfo?.documents || '',
+        name: '',
+        email: '',
+        contactInfo: '',
+        documents: '',
     });
+    const [statusMessage, setStatusMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
-    // Handle input change
-    const handleInputChange = (e) => {
+    // Pre-fill form if userInfo exists
+    useEffect(() => {
+        if (userInfo) {
+            setProfileData({
+                name: userInfo.name || '',
+                email: userInfo.email || '',
+                contactInfo: userInfo.contactInfo || '',
+                documents: userInfo.documents || '',
+            });
+        }
+    }, [userInfo]);
+
+    // Handle form input changes
+    const handleChange = (e) => {
         const { name, value } = e.target;
-        setProfileData({
-            ...profileData,
-            [name]: value
-        });
+        setProfileData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
     };
 
     // Handle form submission
@@ -34,7 +41,7 @@ const InvestorUpdate = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch(`http://localhost:3000/profile/${userInfo?._id}`, {
+            const response = await fetch(apiUrl(`/profile/${userInfo?._id}`), {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

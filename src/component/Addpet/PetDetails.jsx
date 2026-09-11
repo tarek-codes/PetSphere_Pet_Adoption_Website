@@ -4,6 +4,7 @@ import { getPetImageUrl, handleImageError } from '../../utils/imageUtils';
 import { IoMale, IoFemale } from 'react-icons/io5';
 import LocationPicker from '../Profile/LocationPicker';
 import "../../PetDetails.css"; // Importing the CSS file
+import { apiUrl } from '../../utils/api';
 
 
 const PetDetails = () => {
@@ -36,14 +37,14 @@ const PetDetails = () => {
         const fetchPetAndLostStatus = async () => {
             try {
                 // Fetch pet details
-                const petRes = await fetch(`http://localhost:3000/pets/${id}`, {
+                const petRes = await fetch(apiUrl(`/pets/${id}`), {
                     credentials: 'include'
                 });
                 const petData = await petRes.json();
                 setPet(petData);
 
                 // Check if pet is lost
-                const lostRes = await fetch(`http://localhost:3000/lost-pets`, {
+                const lostRes = await fetch(apiUrl('/lost-pets'), {
                     credentials: 'include'
                 });
 
@@ -90,7 +91,7 @@ const PetDetails = () => {
     
     const handleLogWalkingData = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/update-walking-data/${id}`, {
+            const response = await fetch(apiUrl(`/update-walking-data/${id}`), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,49 +99,43 @@ const PetDetails = () => {
                 body: JSON.stringify({ walkedHours, walkedDistance }),
             });
 
-
             if (response.ok) {
                 const updatedPet = await response.json();
-                setPet(updatedPet.pet);
-                setShowWalkingDataPopup(false);
+                setPet(updatedPet.pet); // Update pet state with new walking data
+                setShowWalkingDataPopup(false); // Close popup
             } else {
-                alert('Failed to log walking data.');
+                console.error('Failed to update walking data');
             }
-        } catch (error) {
-            console.error('Error logging walking data:', error);
-            alert('An error occurred while logging walking data.');
+        } catch (err) {
+            console.error('Error logging walking data:', err);
         }
     };
 
 
     const handleResetWalkingData = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/reset-walking-data/${id}`, {
+            const response = await fetch(apiUrl(`/reset-walking-data/${id}`), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
 
-
             if (response.ok) {
                 const updatedPet = await response.json();
-                alert('Walking data reset successfully!');
-                setPet(updatedPet.pet); // Update the pet state with the reset data
-                setShowWalkingDataPopup(false); // Close the popup
+                setPet(updatedPet.pet); // Update pet state with reset walking data
             } else {
-                alert('Failed to reset walking data.');
+                console.error('Failed to reset walking data');
             }
-        } catch (error) {
-            console.error('Error resetting walking data:', error);
-            alert('An error occurred while resetting walking data.');
+        } catch (err) {
+            console.error('Error resetting walking data:', err);
         }
     };
 
 
     const handleLogMedicalData = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/add-health-log/${id}`, {
+            const response = await fetch(apiUrl(`/add-health-log/${id}`), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -182,7 +177,7 @@ const PetDetails = () => {
 
         // Now submit the lost pet report with location
         try {
-            const res = await fetch(`http://localhost:3000/report-lost/${id}`, {
+            const res = await fetch(apiUrl(`/report-lost/${id}`), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -490,7 +485,7 @@ const PetDetails = () => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const res = await fetch(`http://localhost:3000/request-adoption/${id}`, {
+                                        const res = await fetch(apiUrl(`/request-adoption/${id}`), {
                                             method: 'POST',
                                             credentials: 'include',
                                         });
@@ -501,7 +496,7 @@ const PetDetails = () => {
                                         setIsInAdoptionList(data.inAdoptionList);
                                         
                                         // Refresh pet data to update the adoption status
-                                        const updatedPetRes = await fetch(`http://localhost:3000/pets/${id}`, {
+                                        const updatedPetRes = await fetch(apiUrl(`/pets/${id}`), {
                                             credentials: 'include'
                                         });
                                         const updatedPetData = await updatedPetRes.json();
@@ -559,7 +554,7 @@ const PetDetails = () => {
                                 onClick={async () => {
                                     if (window.confirm('Are you sure you want to remove this pet?')) {
                                         try {
-                                            const response = await fetch(`http://localhost:3000/delete-pet/${id}`, {
+                                            const response = await fetch(apiUrl(`/delete-pet/${id}`), {
                                                 method: 'DELETE',
                                                 credentials: 'include',
                                             });

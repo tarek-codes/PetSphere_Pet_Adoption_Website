@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import bg from '../../assets/bg.jpg';
+import { apiUrl } from '../../utils/api';
 
 const EditPetProfile = () => {
     const { id } = useParams();
@@ -16,7 +17,7 @@ const EditPetProfile = () => {
     const [uploadMethod, setUploadMethod] = useState('url'); // 'url' or 'file'
 
     useEffect(() => {
-        fetch(`http://localhost:3000/pets/${id}`)
+        fetch(apiUrl(`/pets/${id}`))
             .then(res => res.json())
             .then(data => {
                 setPet(data);
@@ -39,7 +40,7 @@ const EditPetProfile = () => {
             const formData = new FormData();
             formData.append('image', file);
 
-            fetch('http://localhost:3000/upload-pet-image', {
+            fetch(apiUrl('/upload-pet-image'), {
                 method: 'POST',
                 body: formData,
                 credentials: 'include'
@@ -61,7 +62,7 @@ const EditPetProfile = () => {
     };
 
     const updatePetProfile = () => {
-        fetch(`http://localhost:3000/update-pet/${id}`, {
+        fetch(apiUrl(`/update-pet/${id}`), {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(pet),

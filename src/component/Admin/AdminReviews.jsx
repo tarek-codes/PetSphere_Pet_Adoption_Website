@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../provider/Authprovider';
 import axios from 'axios';
+import { apiUrl } from '../../utils/api';
 
 const AdminReviews = () => {
     const [reviews, setReviews] = useState([]);
@@ -23,7 +24,7 @@ const AdminReviews = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get('http://localhost:3000/api/reviews', { 
+            const response = await axios.get(apiUrl('/api/reviews'), { 
                 withCredentials: true 
             });
             setReviews(response.data);
@@ -46,7 +47,7 @@ const AdminReviews = () => {
         
         try {
             setLoading(true);
-            await axios.delete(`http://localhost:3000/api/reviews/${reviewId}`, {
+            await axios.delete(apiUrl(`/api/reviews/${reviewId}`), {
                 withCredentials: true
             });
             setReviews(prevReviews => prevReviews.filter(review => review._id !== reviewId));

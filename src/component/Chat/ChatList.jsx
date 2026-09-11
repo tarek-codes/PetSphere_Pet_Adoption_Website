@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPetImageUrl, handleImageError } from '../../utils/imageUtils';
 import { IoMale, IoFemale, IoChatbubbleEllipsesOutline, IoChevronForward } from 'react-icons/io5';
+import { apiUrl } from '../../utils/api';
 
 const ChatList = () => {
     const [chats, setChats] = useState([]);
@@ -14,7 +15,7 @@ const ChatList = () => {
 
     const fetchChats = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/chats', {
+            const response = await fetch(apiUrl('/api/chats'), {
                 credentials: 'include'
             });
             

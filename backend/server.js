@@ -1,7 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const bodyParser = require('body-parser');
 const path = require('path');
 const { createServer } = require('http');
@@ -10,51 +12,80 @@ const { startReminderService } = require('./utils/reminderService');
 
 const app = express();
 const server = createServer(app);
+
+// Enable trust proxy for secure cookies behind reverse proxies (like Vercel)
+app.set('trust proxy', 1);
+
+// Allowed origins
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    process.env.CLIENT_URL
+].filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true; // Allow mobile apps or curl/Postman
+    if (allowedOrigins.includes(origin)) return true;
+    if (/\.vercel\.app$/.test(origin)) return true; // Allow all Vercel deployment previews
+    return false;
+};
+
 const io = new Server(server, {
     cors: {
-        origin: ['http://localhost:5173', 'http://localhost:5174'],
+        origin: (origin, callback) => {
+            if (isAllowedOrigin(origin)) {
+                callback(null, true);
+            } else {
+                callback(null, true); // Allow connection in case of preview URLs
+            }
+        },
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
 
-
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174'], // Allow both ports
-    credentials: true // Allow cookies (sessions) to be sent
+    origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) {
+            callback(null, true);
+        } else {
+            callback(null, true);
+        }
+    },
+    credentials: true
 }));
-// app.use(cors());
 
-app.use(express.json())
-// app.use(cors());
-
-
-
+app.use(express.json());
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
-// app.use(session({
-//     secret: 'secretKey',
-//     resave: false,
-//     saveUninitialized: true
-// }));
+
+const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/petsphere';
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Session configuration with MongoStore
 app.use(session({
-    secret: 'secretKey',
+    secret: process.env.SESSION_SECRET || 'secretKey',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: mongoURI,
+        collectionName: 'sessions',
+        ttl: 60 * 60 * 24 // 1 day
+    }),
     cookie: {
-        secure: false, // set to true in production with HTTPS
+        secure: isProduction, // true on HTTPS in production
+        sameSite: isProduction ? 'none' : 'lax', // Required for cross-origin cookies
         httpOnly: true,
-        maxAge: 1000 * 60 * 30 // 30 minutes
+        maxAge: 1000 * 60 * 60 * 24 // 24 hours
     }
 }));
 
-
-
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/petsphere')
+mongoose.connect(mongoURI)
 .then(() => console.log('MongoDB Connected'))
 .catch(err => console.log(err));
 
@@ -305,11 +336,15 @@ io.on('connection', (socket) => {
 // Make io available to routes
 app.set('io', io);
 
-// Start Server
+// Start Server (only when run directly, not when imported as serverless function)
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    // Start the reminder service
-    startReminderService();
-    console.log('Reminder service started');
-});
+if (process.env.VERCEL !== '1' && require.main === module) {
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        // Start the reminder service
+        startReminderService();
+        console.log('Reminder service started');
+    });
+}
+
+module.exports = app;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { IoNotificationsOutline, IoCheckmarkOutline, IoTrashOutline, IoCalendarOutline, IoMedicalOutline, IoAlertCircleOutline } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
+import { apiUrl } from '../../utils/api';
 
 const Notification = () => {
     const [notifications, setNotifications] = useState([]);
@@ -11,7 +12,7 @@ const Notification = () => {
     const fetchNotifications = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/notifications', {
+            const response = await fetch(apiUrl('/api/notifications'), {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -37,7 +38,7 @@ const Notification = () => {
 
     const markAsRead = async (notificationId) => {
         try {
-            const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}`, {
+            const response = await fetch(apiUrl(`/api/notifications/${notificationId}`), {
                 method: 'PATCH',
                 credentials: 'include'
             });
@@ -54,7 +55,7 @@ const Notification = () => {
 
     const deleteNotification = async (notificationId) => {
         try {
-            const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}`, {
+            const response = await fetch(apiUrl(`/api/notifications/${notificationId}`), {
                 method: 'DELETE',
                 credentials: 'include'
             });

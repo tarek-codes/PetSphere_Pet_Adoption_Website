@@ -6,7 +6,8 @@ const LostOrFound = require('./models/LostOrFound');
 const Chat = require('./models/Chat');
 const Review = require('./models/Review');
 
-const mongoURI = 'mongodb://127.0.0.1:27017/petsphere';
+require('dotenv').config();
+const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/petsphere';
 
 const usersData = [
     {

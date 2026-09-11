@@ -5,6 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LocationPicker from './LocationPicker';
 import { IoChevronBackOutline, IoLocationOutline, IoPersonOutline, IoSaveOutline } from 'react-icons/io5';
+import { apiUrl } from '../../utils/api';
 
 const EditUserProfile = () => {
     const { userInfo } = useContext(AuthContext);
@@ -25,11 +26,11 @@ const EditUserProfile = () => {
 
     useEffect(() => {
         if (!userInfo?._id) {
-            console.error('User ID is missing.');
+            setLoading(false);
             return;
         }
 
-        fetch(`http://localhost:3000/profile/${userInfo._id}`)
+        fetch(apiUrl(`/profile/${userInfo._id}`))
             .then((response) => response.json())
             .then((data) => {
                 setProfile({
@@ -74,7 +75,7 @@ const EditUserProfile = () => {
 
     const handleSaveProfile = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/profile/${userInfo._id}`, {
+            const response = await fetch(apiUrl(`/profile/${userInfo._id}`), {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

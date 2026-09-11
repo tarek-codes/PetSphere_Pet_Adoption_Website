@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { IoMedicalOutline, IoTrashOutline, IoCalendarOutline, IoDocumentTextOutline, IoChevronBackOutline } from 'react-icons/io5';
+import { apiUrl } from '../../utils/api';
 
 const Vaccination = () => {
     const { id } = useParams();
@@ -21,7 +22,7 @@ const Vaccination = () => {
 
     useEffect(() => {
         // Fetch user's pets
-        fetch('http://localhost:3000/user-pets', {
+        fetch(apiUrl('/user-pets'), {
             credentials: 'include'
         })
             .then(res => res.json())
@@ -35,29 +36,32 @@ const Vaccination = () => {
                             ...foundPet,
                             vaccinations: foundPet.vaccinations || []
                         });
-                        setSelectedPetId(id);
+                        setSelectedPetId(foundPet._id);
                     }
                 } else if (data.length > 0) {
-                    // Default to first pet if no specific pet ID
-                    const firstPet = data[0];
+                    // Default to first pet if no ID provided
                     setPet({
-                        ...firstPet,
-                        vaccinations: firstPet.vaccinations || []
+                        ...data[0],
+                        vaccinations: data[0].vaccinations || []
                     });
-                    setSelectedPetId(firstPet._id);
+                    setSelectedPetId(data[0]._id);
                 }
             })
-            .catch(err => console.error('Error fetching pets:', err));
+            .catch(err => {
+                console.error('Error fetching user pets:', err);
+                toast.error('Failed to load your pets');
+            });
     }, [id]);
 
-    const handlePetChange = (petId) => {
+    const handlePetChange = (e) => {
+        const petId = e.target.value;
+        setSelectedPetId(petId);
         const selectedPet = userPets.find(p => p._id === petId);
         if (selectedPet) {
             setPet({
                 ...selectedPet,
                 vaccinations: selectedPet.vaccinations || []
             });
-            setSelectedPetId(petId);
         }
     };
 
@@ -77,7 +81,7 @@ const Vaccination = () => {
             return;
         }
 
-        fetch(`http://localhost:3000/add-vaccination/${selectedPetId}`, {
+        fetch(apiUrl(`/add-vaccination/${selectedPetId}`), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newVaccination),
@@ -108,7 +112,7 @@ const Vaccination = () => {
         }
 
         if (window.confirm('Are you sure you want to remove this vaccination record?')) {
-            fetch(`http://localhost:3000/delete-vaccination/${selectedPetId}/${vaccinationId}`, {
+            fetch(apiUrl(`/delete-vaccination/${selectedPetId}/${vaccinationId}`), {
                 method: 'DELETE',
                 credentials: 'include'
             })

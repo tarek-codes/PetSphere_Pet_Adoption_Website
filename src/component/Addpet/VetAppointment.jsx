@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { IoCalendarOutline, IoLocationOutline, IoDocumentTextOutline, IoTrashOutline, IoChevronBackOutline, IoPersonOutline, IoTimeOutline, IoChevronBack, IoChevronForward } from 'react-icons/io5';
+import { apiUrl } from '../../utils/api';
 
 const CLINICS_DATA = {
     "Happy Paws Veterinary Clinic": [
@@ -178,7 +179,7 @@ const VetAppointment = () => {
     useEffect(() => {
         if (id) {
             // Fetch specific pet details directly to support direct URL access
-            fetch(`http://localhost:3000/pets/${id}`, {
+            fetch(apiUrl(`/pets/${id}`), {
                 credentials: 'include'
             })
                 .then(res => res.json())
@@ -195,7 +196,7 @@ const VetAppointment = () => {
         }
 
         // Fetch user's pets
-        fetch('http://localhost:3000/user-pets', {
+        fetch(apiUrl('/user-pets'), {
             credentials: 'include'
         })
             .then(res => res.json())
@@ -210,17 +211,17 @@ const VetAppointment = () => {
                     setSelectedPetId(firstPet._id);
                 }
             })
-            .catch(err => console.error('Error fetching user pets:', err));
+            .catch(err => console.error('Error fetching pets:', err));
     }, [id]);
 
     const handlePetChange = (petId) => {
+        setSelectedPetId(petId);
         const selectedPet = userPets.find(p => p._id === petId);
         if (selectedPet) {
             setPet({
                 ...selectedPet,
                 vetAppointments: selectedPet.vetAppointments || []
             });
-            setSelectedPetId(petId);
         }
     };
 
@@ -260,21 +261,12 @@ const VetAppointment = () => {
         const clinicName = selectedClinic === 'Other / Custom Clinic' ? customClinic : selectedClinic;
         const doctorName = selectedDoctor === 'Other / Custom Doctor' ? customDoctor : selectedDoctor;
 
-        if (!clinicName) {
-            toast.error('Please select or specify a clinic name');
+        if (!clinicName || !doctorName || !appointmentDate || !selectedSlot) {
+            toast.error('Please fill in clinic, doctor, date and time slot');
             return;
         }
 
-        if (!doctorName) {
-            toast.error('Please select or specify a doctor name');
-            return;
-        }
-
-        const dateOfAppointment = getCombinedDateTime(appointmentDate, selectedSlot);
-        if (!dateOfAppointment) {
-            toast.error('Please select both an appointment date and a time slot');
-            return;
-        }
+        const dateOfAppointment = `${appointmentDate}T${selectedSlot}:00`;
 
         const payload = {
             doctorName,
@@ -283,7 +275,7 @@ const VetAppointment = () => {
             notes
         };
 
-        fetch(`http://localhost:3000/add-vet-appointment/${selectedPetId}`, {
+        fetch(apiUrl(`/add-vet-appointment/${selectedPetId}`), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -323,7 +315,7 @@ const VetAppointment = () => {
         }
 
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
-            fetch(`http://localhost:3000/delete-vet-appointment/${selectedPetId}/${appointmentId}`, {
+            fetch(apiUrl(`/delete-vet-appointment/${selectedPetId}/${appointmentId}`), {
                 method: 'DELETE',
                 credentials: 'include'
             })

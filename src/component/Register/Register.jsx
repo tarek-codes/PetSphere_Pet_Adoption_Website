@@ -3,6 +3,7 @@ import { AuthContext } from '../../provider/Authprovider';
 import { Link, useNavigate } from 'react-router-dom';
 import { HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
 import Swal from 'sweetalert2';
+import { apiUrl } from '../../utils/api';
 
 const Register = () => {
     const [errorMsg, setErrorMsg] = useState('');
@@ -20,7 +21,7 @@ const Register = () => {
         const password = form.get('password');
         const info = { name, email, password, role: userType };
 
-        fetch('http://localhost:3000/signup', {
+        fetch(apiUrl('/signup'), {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'

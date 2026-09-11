@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../provider/Authprovider';
 import { Link, useNavigate } from 'react-router-dom';
 import { HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
+import { apiUrl } from '../../utils/api';
 
 const Login = () => {
     const [errorMsg, setErrorMsg] = useState('');
@@ -18,7 +19,7 @@ const Login = () => {
         const password = form.get('password');
 
         try {
-            const response = await fetch('http://localhost:3000/login', {
+            const response = await fetch(apiUrl('/login'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AuthContext } from '../../provider/Authprovider';
 import Swal from 'sweetalert2';
+import { apiUrl } from '../../utils/api';
 
 const Addpet = () => {
   const { user } = useContext(AuthContext);
@@ -81,7 +82,7 @@ const Addpet = () => {
         console.log(key + ':', value);
       }
 
-      const response = await fetch('http://localhost:3000/add-pet', {
+      const response = await fetch(apiUrl('/add-pet'), {
         method: 'POST',
         body: formData,
         credentials: 'include', // Include cookies/session

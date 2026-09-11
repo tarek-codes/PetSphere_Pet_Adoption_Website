@@ -10,6 +10,7 @@ import {
     LostFoundIllustration,
     AdoptionSlotsIllustration
 } from './VectorIllustrations';
+import { apiUrl } from '../../utils/api';
 
 const AdminHome = () => {
     const navigate = useNavigate();
@@ -30,7 +31,7 @@ const AdminHome = () => {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('http://localhost:3000/admin/metrics', {
+            const response = await fetch(apiUrl('/admin/metrics'), {
                 credentials: 'include',
             });
             const data = await response.json();
