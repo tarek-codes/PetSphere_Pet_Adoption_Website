@@ -6,12 +6,31 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const { startReminderService } = require('./utils/reminderService');
+
+const isVercel = process.env.VERCEL === '1';
 
 const app = express();
-const server = createServer(app);
+
+// Only set up Socket.IO when running locally (not serverless)
+let server;
+let io;
+if (!isVercel) {
+    const { createServer } = require('http');
+    const { Server } = require('socket.io');
+    const { startReminderService } = require('./utils/reminderService');
+    server = createServer(app);
+    io = new Server(server, {
+        cors: {
+            origin: (origin, callback) => callback(null, true),
+            methods: ['GET', 'POST'],
+            credentials: true
+        }
+    });
+    app.set('io', io);
+    // Socket.IO logic is only initialized locally (see bottom of file)
+    app._io = io;
+    app._startReminderService = startReminderService;
+}
 
 // Enable trust proxy for secure cookies behind reverse proxies (like Vercel)
 app.set('trust proxy', 1);
@@ -30,19 +49,6 @@ const isAllowedOrigin = (origin) => {
     return false;
 };
 
-const io = new Server(server, {
-    cors: {
-        origin: (origin, callback) => {
-            if (isAllowedOrigin(origin)) {
-                callback(null, true);
-            } else {
-                callback(null, true); // Allow connection in case of preview URLs
-            }
-        },
-        methods: ['GET', 'POST'],
-        credentials: true
-    }
-});
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -86,19 +92,25 @@ async function connectToDatabase() {
     return cachedConnection;
 }
 
-// Session configuration with resilient MongoStore
-const sessionStore = MongoStore.create({
-    mongoUrl: mongoURI,
-    collectionName: 'sessions',
-    ttl: 60 * 60 * 24, // 1 day
-    mongoOptions: {
-        serverSelectionTimeoutMS: 5000
-    }
-});
+// Session store: Use MongoStore in production/local, fallback to memory store on Vercel if MongoStore fails
+let sessionStore;
+try {
+    sessionStore = MongoStore.create({
+        mongoUrl: mongoURI,
+        collectionName: 'sessions',
+        ttl: 60 * 60 * 24, // 1 day
+        mongoOptions: {
+            serverSelectionTimeoutMS: 5000
+        }
+    });
 
-sessionStore.on('error', (err) => {
-    console.error('Session store error:', err.message || err);
-});
+    sessionStore.on('error', (err) => {
+        console.error('Session store error:', err.message || err);
+    });
+} catch (err) {
+    console.error('Failed to create MongoStore, falling back to memory store:', err.message);
+    sessionStore = undefined; // express-session defaults to MemoryStore
+}
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secretKey',
@@ -189,11 +201,12 @@ app.get('/user-info', (req, res) => {
 });
 
 
-// Socket.IO connection handling
-const Chat = require('./models/Chat');
-const User = require('./models/User');
+// Socket.IO connection handling (only in non-serverless mode)
+if (!isVercel && io) {
+    const Chat = require('./models/Chat');
+    const User = require('./models/User');
 
-io.on('connection', (socket) => {
+    io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     // Join a chat room for a specific pet
@@ -260,9 +273,9 @@ io.on('connection', (socket) => {
     // Handle sending messages
     socket.on('send-message', async (data) => {
         try {
-            const { petId, senderId, content, chatId } = data;
+        const { petId, senderId, content, chatId } = data;
 
-            let chat;
+        let chat;
             
             if (chatId) {
                 // If chatId is provided, find the chat directly
@@ -369,10 +382,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
     });
-});
-
-// Make io available to routes
-app.set('io', io);
+} // end if (!isVercel && io)
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -385,7 +395,8 @@ app.use((err, req, res, next) => {
 
 // Start Server (only when run directly, not when imported as serverless function)
 const PORT = process.env.PORT || 3000;
-if (process.env.VERCEL !== '1' && require.main === module) {
+if (!isVercel && require.main === module) {
+    const { startReminderService } = require('./utils/reminderService');
     server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
         // Start the reminder service

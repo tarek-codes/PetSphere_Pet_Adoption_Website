@@ -2,6 +2,7 @@ const User = require('../models/User');
 const AdoptionRequest = require('../models/AdoptionRequest');
 const PetProfile = require('../models/PetProfile');
 const Chat = require('../models/Chat');
+const bcrypt = require('bcryptjs');
 
 
 
@@ -14,7 +15,9 @@ exports.signup = async (req, res) => {
             return res.status(400).json({ message: 'Name, email, and password are required' });
         }
 
-        const newUser = new User({ name, email, password, role: role || 'user' });
+        // Hash password before saving
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ name, email, password: hashedPassword, role: role || 'user' });
         await newUser.save();
         console.log('User created successfully with ID:', newUser._id);
 
@@ -44,8 +47,30 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
         
-        const user = await User.findOne({ email, password });
+        // Find user by email only, then verify password separately
+        const user = await User.findOne({ email });
         if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // Support both bcrypt-hashed passwords (new) and plain-text (legacy seeded users)
+        let isPasswordValid = false;
+        const isBcryptHash = user.password && user.password.startsWith('$2');
+        if (isBcryptHash) {
+            // New users: compare with bcrypt
+            isPasswordValid = await bcrypt.compare(password, user.password);
+        } else {
+            // Legacy plain-text password: direct compare, then migrate to bcrypt
+            isPasswordValid = (user.password === password);
+            if (isPasswordValid) {
+                // Auto-migrate: hash and save the password for next login
+                user.password = await bcrypt.hash(password, 10);
+                await user.save();
+                console.log('Migrated plain-text password to bcrypt for:', user.email);
+            }
+        }
+
+        if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
