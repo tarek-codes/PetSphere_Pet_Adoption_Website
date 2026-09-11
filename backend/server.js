@@ -60,6 +60,7 @@ app.use(express.json());
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/petsphere';
@@ -74,15 +75,43 @@ async function connectToDatabase() {
     }
     if (!cachedConnection) {
         cachedConnection = mongoose.connect(mongoURI, {
-            bufferCommands: false,
+            serverSelectionTimeoutMS: 5000,
+            bufferCommands: false
         }).catch(err => {
             cachedConnection = null;
-            console.error('MongoDB Connection Error:', err);
+            console.error('MongoDB Connection Error:', err.message || err);
             throw err;
         });
     }
     return cachedConnection;
 }
+
+// Session configuration with resilient MongoStore
+const sessionStore = MongoStore.create({
+    mongoUrl: mongoURI,
+    collectionName: 'sessions',
+    ttl: 60 * 60 * 24, // 1 day
+    mongoOptions: {
+        serverSelectionTimeoutMS: 5000
+    }
+});
+
+sessionStore.on('error', (err) => {
+    console.error('Session store error:', err.message || err);
+});
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'secretKey',
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 // 24 hours
+    }
+}));
 
 // Ensure DB is connected before processing requests
 app.use(async (req, res, next) => {
@@ -90,28 +119,13 @@ app.use(async (req, res, next) => {
         await connectToDatabase();
         next();
     } catch (err) {
-        console.error('Database middleware error:', err);
-        res.status(500).json({ message: 'Database connection failed. Please check MongoDB configuration.' });
+        console.error('Database connection middleware failure:', err.message || err);
+        return res.status(500).json({
+            message: 'Database connection failed. Please ensure MongoDB Atlas Network Access allows connections (0.0.0.0/0) and MONGODB_URI is correct.',
+            error: isProduction ? undefined : err.message
+        });
     }
 });
-
-// Session configuration with MongoStore
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'secretKey',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        clientPromise: connectToDatabase().then(m => m.connection.getClient()),
-        collectionName: 'sessions',
-        ttl: 60 * 60 * 24 // 1 day
-    }),
-    cookie: {
-        secure: isProduction, // true on HTTPS in production
-        sameSite: isProduction ? 'none' : 'lax', // Required for cross-origin cookies
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 // 24 hours
-    }
-}));
 
 // Routes
 app.use('/', require('./routes/authRoutes'));
@@ -359,6 +373,15 @@ io.on('connection', (socket) => {
 
 // Make io available to routes
 app.set('io', io);
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('Unhandled server error:', err);
+    res.status(err.status || 500).json({
+        message: err.message || 'Internal Server Error',
+        ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+    });
+});
 
 // Start Server (only when run directly, not when imported as serverless function)
 const PORT = process.env.PORT || 3000;

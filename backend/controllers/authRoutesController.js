@@ -5,31 +5,35 @@ const Chat = require('../models/Chat');
 
 
 
-exports.signup =async (req, res) => {
+exports.signup = async (req, res) => {
     try {
-      const { name, email, password, role } = req.body;
-      console.log('Received data:', req.body);
-      const newUser = new User({ name, email, password, role });
-      await newUser.save();
-      console.log('Received data:', req.body);
-  
-      // Return JSON, not redirect
-      res.status(201).json({ message: 'User created successfully',
-         insertedId: newUser._id 
+        const { name, email, password, role } = req.body;
+        console.log('Received signup data for:', email);
+
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: 'Name, email, and password are required' });
+        }
+
+        const newUser = new User({ name, email, password, role: role || 'user' });
+        await newUser.save();
+        console.log('User created successfully with ID:', newUser._id);
+
+        res.status(201).json({
+            message: 'User created successfully',
+            insertedId: newUser._id
         });
     } catch (error) {
-        console.error('Signup error:', error);
-        
-    
-        if (error.code === 11000 && error.keyValue.email) {
-            return res.status(400).json({ message: 'Email already registered' });
-        }
-        console.error('Signup error:', error);
-        res.status(500).json({ message: 'Server error' });
-        console.error('Signup error:', error);
+        console.error('Signup error details:', error.message || error);
 
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Email is already registered. Please log in.' });
+        }
+
+        res.status(500).json({
+            message: error.message || 'Server error occurred during registration'
+        });
     }
-  }
+};
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
